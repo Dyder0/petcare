@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portal de pago | PetCare</title>
+  <style>
+    body{margin:0;padding:20px;background:#f4f8fa;color:#17385a;font:16px/1.5 system-ui,sans-serif}
+    main{max-width:620px;margin:6vh auto;padding:32px;background:#fff;border-radius:16px;box-shadow:0 12px 36px #17385a18}
+    h1{margin-top:0;font-size:1.6rem}p{color:#617487}
+    label{display:block;margin:20px 0 6px;font-weight:650;color:#17385a}
+    input{box-sizing:border-box;width:100%;padding:12px;border:1px solid #cbd6df;border-radius:8px;font:inherit}
+    button{width:100%;margin-top:12px;padding:13px;border:0;border-radius:9px;background:#138b7d;color:white;font:inherit;font-weight:700;cursor:pointer}
+    .message{margin-top:16px;padding:12px;border-radius:8px;background:#eef5fa;color:#294a68}
+    .error{background:#fff0ee;color:#a33025}.total{display:flex;justify-content:space-between;margin:22px 0 10px;padding:15px 0;border-top:1px solid #e2eaf0;border-bottom:1px solid #e2eaf0;font-size:1.2rem;font-weight:750}
+    .debt{padding:16px 0;border-bottom:1px solid #e2eaf0}.debt h2{margin:0;font-size:1rem}.debt p{margin:4px 0}.debt__amount{font-weight:750;color:#17385a}.debt__pay{display:block;margin-top:10px;padding:12px;border-radius:9px;background:#138b7d;color:white;text-align:center;text-decoration:none;font-weight:700}
+    .muted{font-size:.9rem}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Portal de pago PetCare</h1>
+    <p>En el ambiente de integración, ingresa tu RUT para consultar las cuentas pendientes asociadas y pagar con Webpay Plus de Transbank.</p>
+    <form method="post" action="{% url 'public-payment-portal' %}">
+      {% csrf_token %}
+      <label for="rut">RUT del cliente</label>
+      <input id="rut" name="rut" type="text" inputmode="text" autocomplete="off" placeholder="12.345.678-5" value="{{ rut }}" maxlength="12" required>
+      <button type="submit">Consultar deuda</button>
+    </form>
+
+    {% if error %}<p class="message error" role="alert">{{ error }}</p>{% endif %}
+    {% if message %}<p class="message" role="status">{{ message }}</p>{% endif %}
+
+    {% if has_debts %}
+      <p class="message" role="status">Cuentas pendientes encontradas para el RUT ingresado.</p>
+      <div class="total"><span>Total pendiente</span><span>${{ total_due|floatformat:0 }}</span></div>
+      {% for row in debt_rows %}
+        <article class="debt">
+          <h2>{{ row.debt.concept }}</h2>
+          <p>Vencimiento: {{ row.debt.due_date|date:"d/m/Y" }}</p>
+          <p class="debt__amount">${{ row.debt.amount|floatformat:0 }}</p>
+          {% if row.payment_in_progress %}
+            <p class="message">Este pago está pendiente de confirmación. No inicies otro intento.</p>
+          {% else %}
+            <a class="debt__pay" href="{% url 'public-payment' token=row.debt.payment_token %}">Pagar esta cuenta con Transbank</a>
+          {% endif %}
+        </article>
+      {% endfor %}
+      <p class="muted">Cada cuenta se paga por separado. El pago se procesa en el sitio seguro de Transbank.</p>
+    {% endif %}
+  </main>
+</body>
+</html>

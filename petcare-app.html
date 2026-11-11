@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PetCare – Gestión veterinaria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --c-navy-900:#17385a; --c-navy-700:#1b3a5f; --c-teal-500:#2bb5a4; --c-teal-300:#7ee0d2; --c-teal-700:#0e9384;
+  --c-teal-50:#e6f6f3; --c-teal-25:#f1faf8; --c-orange-400:#ff9f45; --c-orange-700:#d9822b; --c-orange-50:#fff0dd;
+  --c-red-500:#e5484d; --c-red-50:#fde8e8; --c-purple-500:#8b6fe0; --c-purple-50:#ece7fb; --c-blue-500:#5b7fb5; --c-blue-50:#e8eef8;
+  --c-bg:#f4f6fa; --c-white:#fff; --c-line:#e8edf2; --c-border:#dce3ea;
+  --c-slate-400:#a0aec0; --c-slate-500:#8a99ad; --c-slate-600:#64748b; --c-on-navy:#b5c7d6; --c-on-navy-dim:#8fa5ba;
+  --fs-9:9.5px; --fs-10:10px; --fs-11:11px; --fs-12:12px; --fs-13:13px; --fs-14:14px; --fs-15:15px; --fs-16:16px; --fs-20:20px; --fs-24:24px; --fs-28:28px;
+  --sp-4:4px; --sp-8:8px; --sp-12:12px; --sp-16:16px; --sp-20:20px; --sp-22:22px; --sp-34:34px;
+  --r-8:8px; --r-10:10px; --r-12:12px; --r-16:16px;
+  --sh-card:0 1px 3px rgba(23,56,90,.06),0 8px 24px rgba(23,56,90,.04);
+  --sh-btn:0 6px 16px rgba(43,181,164,.3);
+  --sidebar-w:252px; --topbar-h:82px;
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:var(--font);font-size:var(--fs-13);color:var(--c-navy-700);background:var(--c-bg);-webkit-font-smoothing:antialiased}
+h1,h2,h3,p,ul{margin:0;padding:0}
+ul{list-style:none}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer}
+[hidden]{display:none!important}
+.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.icon--sm{width:14px;height:14px}.icon--xs{width:12px;height:12px}.icon--md{width:18px;height:18px}
+:focus-visible{outline:2px solid var(--c-teal-500);outline-offset:2px}
+
+/* ===== Layout ===== */
+.app{display:flex;min-height:100vh}
+.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);background:var(--c-navy-900);color:var(--c-white);padding:25px 18px 20px;display:flex;flex-direction:column;z-index:30;overflow-y:auto;transition:transform .3s ease}
+.main{margin-left:var(--sidebar-w);flex:1;min-width:0;display:flex;flex-direction:column}
+.backdrop{position:fixed;inset:0;background:rgba(10,25,45,.5);opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s;z-index:20}
+
+/* ===== Sidebar ===== */
+.brand{display:flex;align-items:center;gap:10px;padding:0 9px;height:40px}
+.brand__icon{width:40px;height:40px;border-radius:var(--r-12);background:var(--c-teal-500);display:grid;place-items:center}
+.brand__name{font-size:var(--fs-28);font-weight:700;letter-spacing:-.01em;line-height:1}
+.brand__name span{color:var(--c-teal-300)}
+.clinic{margin-top:23px;display:flex;align-items:center;gap:10px;padding:12px;height:57px;border-radius:var(--r-12);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1)}
+.clinic__icon{width:34px;height:34px;border-radius:var(--r-10);background:rgba(43,181,164,.35);color:var(--c-teal-300);display:grid;place-items:center}
+.clinic__label{display:block;font-size:var(--fs-11);color:var(--c-on-navy-dim);line-height:15px}
+.clinic__name{display:block;font-size:var(--fs-12);font-weight:700;line-height:17px}
+.nav{margin-top:24px}
+.nav__title{padding:0 10px;font-size:var(--fs-10);font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--c-on-navy-dim);line-height:14px;margin-bottom:5px}
+.nav__list{display:flex;flex-direction:column;gap:5px}
+.nav__link{display:flex;align-items:center;gap:12px;height:42px;padding:0 12px;border-radius:var(--r-10);font-size:var(--fs-14);color:var(--c-on-navy);transition:background-color .2s,color .2s}
+.nav__link:hover{background:rgba(255,255,255,.07)}
+.nav__link[aria-current="page"]{background:var(--c-teal-500);color:var(--c-white);box-shadow:var(--sh-btn)}
+.nav__badge{margin-left:auto;min-width:20px;height:20px;border-radius:50%;background:var(--c-orange-400);color:#fff;font-size:var(--fs-11);font-weight:700;display:grid;place-items:center}
+.sidebar__footer{margin-top:auto;padding-top:24px;display:flex;flex-direction:column;gap:11px}
+.help{display:flex;align-items:center;gap:10px;padding:12px;height:57px;border-radius:var(--r-12);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1)}
+.help .icon{color:var(--c-teal-300)}
+.help__title{display:block;font-size:var(--fs-12);font-weight:700;line-height:17px}
+.help__sub{display:block;font-size:var(--fs-11);color:var(--c-on-navy-dim);line-height:14px}
+
+/* ===== Topbar ===== */
+.topbar{height:var(--topbar-h);background:var(--c-white);display:flex;align-items:center;justify-content:space-between;padding:0 var(--sp-34);gap:16px;position:sticky;top:0;z-index:10}
+.topbar__left{display:flex;align-items:center;gap:12px;min-width:0}
+.topbar__menu{display:none;width:38px;height:38px;border:1px solid var(--c-line);border-radius:var(--r-10);background:#fff;align-items:center;justify-content:center;color:var(--c-navy-700)}
+.topbar__title{font-size:var(--fs-20);font-weight:700;line-height:30px;letter-spacing:-.01em}
+.topbar__sub{font-size:var(--fs-13);line-height:20px;color:var(--c-slate-600)}
+.topbar__right{display:flex;align-items:center;gap:18px}
+.bell{position:relative;width:38px;height:38px;border:1px solid var(--c-line);border-radius:var(--r-10);background:#fff;display:grid;place-items:center;color:var(--c-navy-700)}
+.bell__dot{position:absolute;top:7px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--c-orange-400);border:1.5px solid #fff}
+.user{display:flex;align-items:center;gap:10px;padding-left:18px;border-left:1px solid var(--c-line)}
+.avatar{border-radius:50%;background:#d5f2ee;color:var(--c-teal-700);font-weight:700;display:grid;place-items:center;flex:none}
+.avatar--38{width:38px;height:38px;font-size:var(--fs-12)}
+.user__name{display:block;font-size:var(--fs-12);font-weight:700;line-height:16px}
+.user__role{display:block;font-size:var(--fs-11);color:var(--c-slate-600);line-height:14px}
+
+/* ===== Page ===== */
+.content{padding:28px var(--sp-34) 40px}
+.card{background:var(--c-white);border-radius:var(--r-16);box-shadow:var(--sh-card)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 18px;border-radius:var(--r-10);font-size:var(--fs-13);font-weight:600;border:1px solid transparent;transition:filter .2s,background-color .2s;white-space:nowrap}
+.btn--primary{background:var(--c-teal-500);color:#fff;box-shadow:var(--sh-btn)}
+.btn--primary:hover{filter:brightness(.96)}
+.btn--outline{background:#fff;border-color:var(--c-border);color:var(--c-navy-700)}
+.btn--outline:hover{background:#f8fafc}
+.link{font-size:var(--fs-11);font-weight:700;color:var(--c-teal-700);display:inline-flex;align-items:center;gap:4px}
+.link:hover{text-decoration:underline}
+.badge{display:inline-flex;align-items:center;height:22px;padding:0 10px;border-radius:999px;font-size:var(--fs-10);font-weight:600;white-space:nowrap}
+.badge--ok{background:var(--c-teal-50);color:var(--c-teal-700)}
+.badge--warn{background:var(--c-orange-50);color:var(--c-orange-700)}
+.badge--off{background:var(--c-red-50);color:var(--c-red-500)}
+.badge--muted{background:#eef1f5;color:var(--c-slate-600)}
+.dots{letter-spacing:2px;font-weight:700;color:var(--c-slate-500);background:none;border:0;font-size:var(--fs-16);line-height:1;padding:4px}
+.pet{border-radius:50%;display:grid;place-items:center;flex:none}
+.pet--orange{background:var(--c-orange-50);color:var(--c-orange-700)}
+.pet--teal{background:var(--c-teal-50);color:var(--c-teal-700)}
+.pet--38{width:38px;height:38px}.pet--26{width:26px;height:26px}
+.field-input{display:block;width:100%;height:43px;padding:0 12.7px;font:inherit;font-size:var(--fs-12);color:var(--c-navy-700);background:#fff;border:1px solid var(--c-border);border-radius:var(--r-10);outline:none;transition:border-color .2s,box-shadow .2s;appearance:none;-webkit-appearance:none}
+.field-input::placeholder{color:var(--c-slate-400);opacity:1}
+.field-input:focus-visible{border-color:var(--c-teal-500);box-shadow:0 0 0 3px rgba(43,181,164,.18)}
+.table-wrap{overflow-x:auto}
+
+/* ===== Inicio ===== */
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.section-head__title{font-size:var(--fs-20);font-weight:700;letter-spacing:-.01em}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:22px}
+.stat{display:flex;gap:14px;padding:18.7px}
+.stat__icon{width:43px;height:43px;border-radius:var(--r-12);display:grid;place-items:center;flex:none}
+.stat__icon--teal{background:var(--c-teal-50);color:var(--c-teal-500)}
+.stat__icon--blue{background:var(--c-blue-50);color:var(--c-blue-500)}
+.stat__icon--orange{background:var(--c-orange-50);color:var(--c-orange-400)}
+.stat__icon--purple{background:var(--c-purple-50);color:var(--c-purple-500)}
+.stat__label{font-size:var(--fs-11);color:var(--c-slate-600);line-height:15px}
+.stat__value{font-size:var(--fs-24);font-weight:700;line-height:29px}
+.stat__note{font-size:var(--fs-10);color:var(--c-slate-500);line-height:16.5px;margin-top:0}
+.home-grid{display:grid;grid-template-columns:minmax(0,620fr) minmax(0,320fr);gap:20px;margin-top:20px}
+.panel{padding:21.7px}
+.panel__head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.panel__title{font-size:var(--fs-15);font-weight:700;line-height:21px}
+.panel__sub{font-size:var(--fs-11);color:var(--c-slate-600);line-height:16px}
+.appts{margin-top:17px}
+.appt{display:flex;align-items:center;gap:14px;height:65px;border-top:1px solid var(--c-line)}
+.appt__time{width:48px;text-align:center;flex:none}
+.appt__hour{display:block;font-size:var(--fs-13);font-weight:700;line-height:16px}
+.appt__day{display:block;font-size:var(--fs-9);color:var(--c-slate-500)}
+.appt__info{flex:1;min-width:0}
+.appt__title{font-size:var(--fs-12);color:var(--c-slate-600)}
+.appt__title strong{color:var(--c-navy-700);font-weight:700}
+.appt__vet{font-size:var(--fs-10);color:var(--c-slate-500);margin-top:2px}
+.reminders{margin-top:17px}
+.rem{display:flex;align-items:center;gap:12px;height:63px;border-top:1px solid var(--c-line);padding:0}
+.rem__date{width:39px;height:45px;border-radius:var(--r-10);display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none}
+.rem__date--orange{background:var(--c-orange-50);color:var(--c-orange-700)}
+.rem__date--teal{background:var(--c-teal-50);color:var(--c-teal-700)}
+.rem__day{font-size:var(--fs-16);font-weight:700;line-height:17px}
+.rem__mon{font-size:8px;font-weight:600;line-height:10px}
+.rem__info{flex:1}
+.rem__title{font-size:var(--fs-11);font-weight:700}
+.rem__sub{font-size:var(--fs-10);color:var(--c-slate-500)}
+.tip{margin-top:16px;padding:14px;border-radius:var(--r-12);background:#eaf7f5;display:flex;gap:10px;align-items:flex-start}
+.tip .icon{color:var(--c-teal-700)}
+.tip__title{font-size:var(--fs-11);font-weight:700;color:var(--c-teal-700)}
+.tip__text{font-size:var(--fs-10);line-height:15px;color:var(--c-slate-600);margin-top:3px}
+.quick{margin-top:20px}
+.quick__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.quick__item{display:flex;align-items:center;gap:12px;height:56.4px;padding:0 12px;border:1px solid var(--c-line);border-radius:var(--r-12);background:#fff;font-size:var(--fs-11);font-weight:700;text-align:left;transition:background-color .2s}
+.quick__item:hover{background:#f8fafc}
+.quick__icon{width:32px;height:32px;border-radius:var(--r-10);background:var(--c-teal-50);color:var(--c-teal-700);display:grid;place-items:center}
+.quick__item .chev{margin-left:auto;color:var(--c-slate-500)}
+
+/* ===== Registro ===== */
+.crumbs{display:flex;align-items:center;gap:8px;font-size:var(--fs-10);color:var(--c-slate-600);line-height:14px}
+.form-card{padding:24.7px;margin-top:17px}
+.form-card + .form-card{margin-top:18px}
+.form-card__head{display:flex;gap:12px;align-items:center;padding-bottom:24px;border-bottom:1px solid var(--c-line)}
+.step{width:32px;height:32px;border-radius:var(--r-10);background:var(--c-teal-500);color:#fff;font-size:var(--fs-13);font-weight:700;display:grid;place-items:center;flex:none}
+.form-card__title{font-size:var(--fs-16);font-weight:500;line-height:21px}
+.form-card__sub{font-size:var(--fs-10);color:var(--c-slate-600);line-height:17px}
+.grid{display:grid;gap:18px;margin-top:20px}
+.grid--2{grid-template-columns:repeat(2,1fr)}
+.grid--3{grid-template-columns:repeat(3,1fr)}
+.field__label{display:block;font-size:var(--fs-11);font-weight:600;line-height:15px;margin-bottom:7px}
+.req{color:var(--c-red-500)}
+.select{position:relative}
+.select .field-input{padding-right:34px}
+.select .icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;width:16px;height:16px}
+.upload{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:18px;height:60px;background:var(--c-teal-25);border:1px solid var(--c-line);border-radius:var(--r-12);text-align:left}
+.upload__btn{width:32px;height:32px;border-radius:var(--r-10);border:1px solid #bfe7e1;background:#fff;color:var(--c-teal-500);display:grid;place-items:center}
+.upload__title{display:block;font-size:var(--fs-10);font-weight:700;color:var(--c-teal-700);line-height:14px}
+.upload__sub{display:block;font-size:var(--fs-9);color:var(--c-slate-500);line-height:14px}
+.form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:17px}
+.form-actions .btn{height:42px}
+
+/* ===== Disponibilidad ===== */
+.toolbar{display:flex;align-items:center;gap:12px;padding:14px;flex-wrap:wrap}
+.toolbar__select{position:relative;width:250px}
+.toolbar__select .field-input{height:44px;padding-left:38px;padding-right:34px;color:var(--c-navy-700)}
+.toolbar__select .icon--l{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--c-slate-600);pointer-events:none}
+.toolbar__select .icon--r{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;pointer-events:none}
+.toolbar__date{display:flex;align-items:center;gap:10px;height:44px;padding:0 12px;border:1px solid var(--c-border);border-radius:var(--r-10);font-size:var(--fs-11);color:var(--c-slate-600);background:#fff}
+.toolbar__date .icon{color:var(--c-slate-600);width:18px;height:18px}
+.toolbar .btn{margin-left:auto}
+.avail{display:grid;grid-template-columns:minmax(0,458fr) minmax(0,481fr);gap:21px;margin-top:20px}
+.cal{padding:22px}
+.cal__nav{display:flex;align-items:center;justify-content:space-between}
+.cal__month{font-size:var(--fs-14);font-weight:500}
+.cal__btn{width:28px;height:28px;border:1px solid var(--c-line);border-radius:var(--r-8);background:#fff;display:grid;place-items:center;color:var(--c-slate-600);font-size:var(--fs-14)}
+.cal__grid{display:grid;grid-template-columns:repeat(7,1fr);margin-top:18px;text-align:center;row-gap:0}
+.cal__dow{font-size:var(--fs-9);font-weight:700;color:var(--c-slate-500);height:28px}
+.cal__day{height:48.5px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:var(--fs-12);color:var(--c-navy-700);position:relative;border:0;background:none;border-radius:var(--r-12)}
+.cal__day--out{color:#c3ccd6}
+.cal__day--dot::after{content:"";position:absolute;bottom:7px;width:4px;height:4px;border-radius:50%;background:var(--c-teal-500)}
+.cal__day--sel{background:var(--c-teal-500);color:#fff;font-weight:700;box-shadow:var(--sh-btn);width:54px;height:51px;justify-self:center}
+.cal__legend{display:flex;justify-content:center;gap:16px;border-top:1px solid var(--c-line);margin-top:14px;padding-top:16px;font-size:var(--fs-9);color:var(--c-slate-500)}
+.cal__legend span{display:flex;align-items:center;gap:6px}
+.cal__legend i{width:7px;height:7px;border-radius:2px;background:var(--c-teal-500)}
+.cal__legend span+span i{background:#bfe7e1}
+.day{padding:22px}
+.day__head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.pill{height:22px;padding:0 10px;border-radius:999px;background:var(--c-teal-50);color:var(--c-teal-700);font-size:var(--fs-9);display:inline-flex;align-items:center}
+.vet{display:flex;align-items:center;gap:12px;margin-top:16px;padding:12px;background:#f4f7fb;border-radius:var(--r-12)}
+.vet .avatar{background:#dce6f2;color:var(--c-navy-700)}
+.vet__name{font-size:var(--fs-11);font-weight:700}
+.vet__time{font-size:var(--fs-10);color:var(--c-slate-600)}
+.vet .link{margin-left:auto}
+.slots__label{font-size:var(--fs-11);margin:17px 0 9px}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.slot{height:43px;border-radius:var(--r-8);border:1px solid #bfe7e1;background:#edf8f6;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--c-teal-700)}
+.slot b{font-size:var(--fs-12);line-height:15px}
+.slot small{font-size:8.5px;line-height:11px}
+.slot--busy{background:#f1f3f5;border-color:#e1e5ea;color:var(--c-slate-500)}
+.slot--busy b{text-decoration:line-through}
+
+/* ===== Ficha médica ===== */
+.search{display:flex;max-width:619px;height:45px;background:#fff;border-radius:var(--r-12);box-shadow:var(--sh-card);overflow:hidden}
+.search__wrap{position:relative;flex:1}
+.search__wrap .icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--c-slate-500);width:18px;height:18px}
+.search__input{width:100%;height:100%;border:0;outline:0;padding:0 14px 0 42px;font:inherit;font-size:var(--fs-11);color:var(--c-navy-700);background:transparent}
+.search__input::placeholder{color:var(--c-slate-400);opacity:1}
+.search__btn{border:0;background:var(--c-teal-500);color:#fff;font-weight:600;font-size:var(--fs-12);padding:0 20px}
+.patient{display:flex;align-items:center;gap:20px;padding:20px 20px;margin-top:20px;flex-wrap:wrap}
+.patient__avatar{width:76px;height:76px;border-radius:50%;background:var(--c-orange-50);color:var(--c-orange-700);display:grid;place-items:center;flex:none}
+.patient__id{font-size:8px;font-weight:700;letter-spacing:.14em;color:var(--c-teal-700);text-transform:uppercase}
+.patient__name{font-size:var(--fs-24);font-weight:500;line-height:30px}
+.patient__meta{font-size:var(--fs-10);color:var(--c-slate-600)}
+.patient__facts{display:flex;gap:34px;margin-left:46px;padding-left:20px;border-left:1px solid var(--c-line);flex:1}
+.fact__label{display:block;font-size:var(--fs-9);color:var(--c-slate-500);line-height:14px}
+.fact__value{display:block;font-size:var(--fs-11);font-weight:700;line-height:18px}
+.patient .btn{height:40px}
+.record{margin-top:20px;overflow:hidden}
+.tabs{display:flex;gap:26px;padding:0 24px;border-bottom:1px solid var(--c-line);height:47px;align-items:stretch;overflow-x:auto}
+.tab{background:none;border:0;border-bottom:2px solid transparent;font-size:var(--fs-10);color:var(--c-slate-600);display:flex;align-items:center;gap:6px;padding:0;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--c-teal-700);font-weight:600;border-bottom-color:var(--c-teal-500)}
+.tab__count{background:var(--c-teal-50);color:var(--c-teal-700);border-radius:999px;padding:1px 6px;font-size:var(--fs-9);font-weight:700}
+.record__body{padding:20px 24px 38px}
+.record__head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.record__title{font-size:var(--fs-16);font-weight:500}
+.timeline{margin-top:14px;display:flex;flex-direction:column}
+.tl{display:flex;gap:12px;position:relative;padding-bottom:22px}
+.tl:last-child{padding-bottom:0}
+.tl::before{content:"";position:absolute;left:15px;top:32px;bottom:-4px;width:1px;background:var(--c-line)}
+.tl:last-child::before{display:none}
+.tl__dot{width:32px;height:32px;border-radius:50%;background:var(--c-teal-50);color:var(--c-teal-700);display:grid;place-items:center;flex:none}
+.tl__dot .icon{width:15px;height:15px}
+.tl__body{flex:1;min-width:0}
+.tl__top{display:flex;align-items:center;gap:8px;font-size:8.5px;color:var(--c-slate-600);letter-spacing:.04em;text-transform:uppercase;height:22px}
+.tl__title{font-size:var(--fs-14);font-weight:500;margin-top:8px}
+.tl__desc{font-size:var(--fs-10);color:var(--c-slate-600);margin-top:6px}
+.tl__foot{display:flex;align-items:center;justify-content:space-between;margin-top:14px;font-size:var(--fs-10);color:var(--c-slate-600)}
+.tl__vet{display:flex;align-items:center;gap:8px}
+.avatar--24{width:24px;height:24px;font-size:8px}
+.tl__foot .link{font-size:var(--fs-9);font-weight:500}
+
+/* ===== Recordatorios ===== */
+.banner{display:flex;align-items:center;gap:14px;padding:22px 20px;border-radius:var(--r-16);background:linear-gradient(90deg,#2bb5a4,#27ab9d);color:#fff;box-shadow:0 10px 28px rgba(43,181,164,.25);flex-wrap:wrap}
+.banner__icon{width:40px;height:40px;border-radius:var(--r-12);background:rgba(255,255,255,.18);display:grid;place-items:center;flex:none}
+.banner__text{flex:1;min-width:200px}
+.banner__title{font-size:var(--fs-13);font-weight:700}
+.banner__sub{font-size:var(--fs-10);opacity:.9;margin-top:3px}
+.banner .btn{background:#fff;color:var(--c-teal-700);height:41px;padding:0 17px;font-weight:700;font-size:var(--fs-13)}
+.banner__close{background:none;border:0;color:#fff;padding:4px;display:grid;place-items:center}
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
+.stat3{display:flex;align-items:center;gap:12px;padding:15px}
+.stat3 .stat__icon{width:40px;height:40px}
+.stat3__value{font-size:var(--fs-20);font-weight:700;line-height:24px}
+.stat3__label{font-size:var(--fs-10);color:var(--c-slate-600)}
+.rtable{margin-top:20px;overflow:hidden}
+.rtable__head{display:flex;justify-content:space-between;align-items:flex-start;padding:22px 21px 20px;gap:12px;flex-wrap:wrap}
+.seg{display:flex;background:#f1f4f8;border-radius:var(--r-10);padding:3px;gap:2px}
+.seg button{border:0;background:none;border-radius:8px;height:26px;padding:0 10px;font-size:var(--fs-9);color:var(--c-slate-600)}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--c-navy-700);box-shadow:0 1px 3px rgba(23,56,90,.12)}
+.table{width:100%;border-collapse:collapse;min-width:640px}
+.table th{background:#f7f9fc;text-align:left;font-size:var(--fs-9);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--c-slate-500);height:30px;padding:0 0 0 21px;border-top:1px solid var(--c-line);border-bottom:1px solid var(--c-line)}
+.table td{height:51.5px;padding:0 0 0 21px;font-size:var(--fs-10);color:var(--c-slate-600);border-bottom:1px solid var(--c-line)}
+.table tr:last-child td{border-bottom:0}
+.cell-strong{display:block;font-size:var(--fs-10);font-weight:700;color:var(--c-navy-700)}
+.cell-sub{display:block;font-size:var(--fs-9);color:var(--c-slate-500)}
+.cell-pet{display:flex;align-items:center;gap:8px;font-size:var(--fs-10);font-weight:700;color:var(--c-navy-700)}
+
+/* ===== Administración ===== */
+.admin{display:grid;grid-template-columns:minmax(0,209fr) minmax(0,729fr);gap:22px;align-items:start}
+.settings{padding:14px 11px 11px}
+.settings__title{font-size:var(--fs-12);padding:6px 8px 11px}
+.settings__link{display:flex;align-items:center;gap:10px;height:39px;padding:0 10px;border-radius:var(--r-10);font-size:var(--fs-10);color:var(--c-slate-600);margin-top:0}
+.settings__link .icon{width:17px;height:17px}
+.settings__link .chev{margin-left:auto;width:14px;height:14px}
+.settings__link[aria-current="true"]{background:#e6f6f3;color:var(--c-teal-700);font-weight:600}
+.users{overflow:hidden}
+.users__head{display:flex;justify-content:space-between;align-items:flex-start;padding:21px 21px 18px;gap:12px;flex-wrap:wrap}
+.users .btn{height:40px}
+.user-cell{display:flex;align-items:center;gap:12px;padding:8px 0}
+.user-cell .avatar{width:34px;height:34px;font-size:var(--fs-11)}
+.user-cell__name{display:block;font-size:var(--fs-10);font-weight:700;color:var(--c-navy-700);width:62px;line-height:13px}
+.user-cell__role{display:block;font-size:var(--fs-9);color:var(--c-slate-500)}
+.users .table td{height:56px}
+.mail{color:var(--c-slate-600)}
+.icon-btn{width:28px;height:28px;border:1px solid var(--c-line);border-radius:var(--r-8);background:#fff;display:inline-grid;place-items:center;color:var(--c-slate-600);margin-right:6px}
+.icon-btn .icon{width:14px;height:14px}
+.icon-btn--danger{color:var(--c-red-500)}
+
+/* ===== Tablet ===== */
+@media (max-width:1024px){
+  .sidebar{transform:translateX(-100%);box-shadow:none}
+  .app--menu-open .sidebar{transform:none;box-shadow:0 0 40px rgba(0,0,0,.3)}
+  .app--menu-open .backdrop{opacity:1;visibility:visible}
+  .main{margin-left:0}
+  .topbar__menu{display:inline-flex}
+  .topbar,.content{padding-left:24px;padding-right:24px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .home-grid,.avail{grid-template-columns:1fr}
+  .admin{grid-template-columns:1fr}
+  .patient__facts{margin-left:0;flex-wrap:wrap;gap:20px 34px}
+}
+/* ===== Mobile ===== */
+@media (max-width:768px){
+  .topbar{padding:0 16px;height:auto;min-height:var(--topbar-h);padding-top:12px;padding-bottom:12px}
+  .content{padding:20px 16px 32px}
+  .topbar__title{font-size:var(--fs-16);line-height:22px}
+  .topbar__sub{font-size:var(--fs-11);line-height:16px}
+  .user__info,.user .icon,.user{display:none}
+  .user{display:none}
+  .stats,.stats3,.quick__grid,.grid--2,.grid--3{grid-template-columns:1fr}
+  .section-head{flex-wrap:wrap}
+  .form-actions{flex-wrap:wrap}
+  .form-actions .btn{flex:1}
+  .patient{gap:14px}
+  .patient__facts{border-left:0;padding-left:0}
+  .record__head{flex-wrap:wrap}
+  .toolbar__select{width:100%}
+  .toolbar .btn{margin-left:0;width:100%}
+  .slots{grid-template-columns:repeat(2,1fr)}
+  .appt{height:auto;padding:12px 0;flex-wrap:wrap}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- Icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16.5" rx="2"/><path d="M16 2.5v4M8 2.5v4M3 10h18M9 15.5l2 2 4-4"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 2.5h6v3H9zM12 10v6M9 13h6"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M16 4a4 4 0 0 1 0 8M22 21c0-3-2-5-5-5.7"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21.2l7.8-7.7 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M17 3a2.8 2.8 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+  <symbol id="i-paw" viewBox="0 0 24 24"><circle cx="7.5" cy="6" r="2.4"/><circle cx="16.5" cy="6" r="2.4"/><circle cx="3.8" cy="12" r="2"/><circle cx="20.2" cy="12" r="2"/><ellipse cx="12" cy="15.6" rx="4.6" ry="4"/></symbol>
+</svg>
+
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar" aria-label="Navegación principal">
+    <a class="brand" href="#inicio">
+      <span class="brand__icon"><svg class="icon" style="width:27px;height:27px;stroke:#fff"><use href="#i-paw"/></svg></span>
+      <span class="brand__name">Pet<span>Care</span></span>
+    </a>
+    <div class="clinic">
+      <span class="clinic__icon"><svg class="icon md icon--md"><use href="#i-heart"/></svg></span>
+      <span><span class="clinic__label">Clínica</span><span class="clinic__name">PetCare Providencia</span></span>
+    </div>
+    <nav class="nav">
+      <p class="nav__title">Menú principal</p>
+      <ul class="nav__list">
+        <li><a class="nav__link" href="#inicio" data-route="inicio"><svg class="icon"><use href="#i-home"/></svg>Inicio</a></li>
+        <li><a class="nav__link" href="#registro" data-route="registro"><svg class="icon"><use href="#i-user"/></svg>Tutores y mascotas</a></li>
+        <li><a class="nav__link" href="#disponibilidad" data-route="disponibilidad"><svg class="icon"><use href="#i-clock"/></svg>Disponibilidad</a></li>
+        <li><a class="nav__link" href="#gestion-de-citas" data-route="gestion-de-citas"><svg class="icon"><use href="#i-cal"/></svg>Gestión de citas</a></li>
+        <li><a class="nav__link" href="#ficha" data-route="ficha"><svg class="icon"><use href="#i-clip"/></svg>Fichas médicas</a></li>
+        <li><a class="nav__link" href="#recordatorios" data-route="recordatorios"><svg class="icon"><use href="#i-bell"/></svg>Recordatorios<span class="nav__badge">3</span></a></li>
+        <li><a class="nav__link" href="#administracion" data-route="administracion"><svg class="icon"><use href="#i-users"/></svg>Administración</a></li>
+      </ul>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="help">
+        <svg class="icon"><use href="#i-shield"/></svg>
+        <span><span class="help__title">¿Necesitas ayuda?</span><span class="help__sub">Contacta a soporte</span></span>
+      </div>
+      <a class="nav__link" href="petcare-login.html"><svg class="icon"><use href="#i-out"/></svg>Cerrar sesión</a>
+    </div>
+  </aside>
+  <div class="backdrop" id="backdrop"></div>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar__left">
+        <button class="topbar__menu" id="menuBtn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar"><svg class="icon"><use href="#i-menu"/></svg></button>
+        <div>
+          <h1 class="topbar__title" id="pageTitle">Buenos días, Carolina</h1>
+          <p class="topbar__sub" id="pageSub">Aquí tienes el resumen de hoy en PetCare.</p>
+        </div>
+      </div>
+      <div class="topbar__right">
+        <button class="bell" type="button" aria-label="Notificaciones"><svg class="icon"><use href="#i-bell"/></svg><span class="bell__dot"></span></button>
+        <div class="user">
+          <span class="avatar avatar--38">CM</span>
+          <span class="user__info"><span class="user__name">Carolina Méndez</span><span class="user__role">Administradora</span></span>
+          <svg class="icon icon--sm" style="color:var(--c-navy-700)"><use href="#i-right"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <main class="content" id="content">
+
+      <!-- ============ INICIO ============ -->
+      <section class="page" id="inicio" data-title="Buenos días, Carolina" data-sub="Aquí tienes el resumen de hoy en PetCare." aria-label="Inicio">
+        <div class="section-head">
+          <h2 class="section-head__title">Resumen general</h2>
+          <button class="btn btn--primary" type="button"><svg class="icon md icon--md"><use href="#i-plus"/></svg>Agendar cita</button>
+        </div>
+        <div class="stats">
+          <article class="card stat"><span class="stat__icon stat__icon--teal"><svg class="icon"><use href="#i-cal"/></svg></span><div><p class="stat__label">Citas para hoy</p><p class="stat__value">8</p><p class="stat__note">2 pendientes de confirmar</p></div></article>
+          <article class="card stat"><span class="stat__icon stat__icon--blue"><svg class="icon"><use href="#i-user"/></svg></span><div><p class="stat__label">Mascotas registradas</p><p class="stat__value">124</p><p class="stat__note">+12 este mes</p></div></article>
+          <article class="card stat"><span class="stat__icon stat__icon--orange"><svg class="icon"><use href="#i-clock"/></svg></span><div><p class="stat__label">Horarios disponibles</p><p class="stat__value">6</p><p class="stat__note">Próximos 7 días</p></div></article>
+          <article class="card stat"><span class="stat__icon stat__icon--purple"><svg class="icon"><use href="#i-bell"/></svg></span><div><p class="stat__label">Recordatorios</p><p class="stat__value">3</p><p class="stat__note">Requieren atención</p></div></article>
+        </div>
+
+        <div class="home-grid">
+          <section class="card panel" aria-labelledby="h-citas">
+            <div class="panel__head">
+              <div><h3 class="panel__title" id="h-citas">Próximas citas</h3><p class="panel__sub">Agenda para hoy, 18 de junio</p></div>
+              <a class="link" href="#gestion-de-citas" style="margin-top:12px">Ver todas<svg class="icon icon--sm"><use href="#i-right"/></svg></a>
+            </div>
+            <ul class="appts">
+              <li class="appt"><div class="appt__time"><span class="appt__hour">09:30</span><span class="appt__day">Hoy</span></div><span class="pet pet--orange pet--38"><svg class="icon icon--md"><use href="#i-paw"/></svg></span><div class="appt__info"><p class="appt__title"><strong>Milo</strong> · Consulta general</p><p class="appt__vet">Dr. Sebastián Rojas</p></div><span class="badge badge--ok">Confirmada</span><button class="dots" type="button" aria-label="Más opciones">•••</button></li>
+              <li class="appt"><div class="appt__time"><span class="appt__hour">11:00</span><span class="appt__day">Hoy</span></div><span class="pet pet--teal pet--38"><svg class="icon icon--md"><use href="#i-paw"/></svg></span><div class="appt__info"><p class="appt__title"><strong>Luna</strong> · Vacunación anual</p><p class="appt__vet">Dra. Camila Torres</p></div><span class="badge badge--ok">Confirmada</span><button class="dots" type="button" aria-label="Más opciones">•••</button></li>
+              <li class="appt"><div class="appt__time"><span class="appt__hour">12:30</span><span class="appt__day">Hoy</span></div><span class="pet pet--orange pet--38"><svg class="icon icon--md"><use href="#i-paw"/></svg></span><div class="appt__info"><p class="appt__title"><strong>Bruno</strong> · Control post operatorio</p><p class="appt__vet">Dr. Sebastián Rojas</p></div><span class="badge badge--warn">Por confirmar</span><button class="dots" type="button" aria-label="Más opciones">•••</button></li>
+              <li class="appt"><div class="appt__time"><span class="appt__hour">15:00</span><span class="appt__day">Hoy</span></div><span class="pet pet--teal pet--38"><svg class="icon icon--md"><use href="#i-paw"/></svg></span><div class="appt__info"><p class="appt__title"><strong>Nala</strong> · Consulta dermatológica</p><p class="appt__vet">Dra. Andrea Silva</p></div><span class="badge badge--ok">Confirmada</span><button class="dots" type="button" aria-label="Más opciones">•••</button></li>
+            </ul>
+          </section>
+
+          <section class="card panel" aria-labelledby="h-rec">
+            <div class="panel__head">
+              <div><h3 class="panel__title" id="h-rec">Recordatorios</h3><p class="panel__sub">Próximos cuidados</p></div>
+              <a class="link" href="#recordatorios" style="margin-top:12px">Ver todos</a>
+            </div>
+            <ul class="reminders">
+              <li class="rem"><span class="rem__date rem__date--orange"><span class="rem__day">21</span><span class="rem__mon">JUN</span></span><div class="rem__info"><p class="rem__title">Vacuna antirrábica</p><p class="rem__sub">Milo · En 3 días</p></div><svg class="icon icon--md"><use href="#i-right"/></svg></li>
+              <li class="rem"><span class="rem__date rem__date--teal"><span class="rem__day">02</span><span class="rem__mon">JUL</span></span><div class="rem__info"><p class="rem__title">Control anual</p><p class="rem__sub">Luna · En 14 días</p></div><svg class="icon icon--md"><use href="#i-right"/></svg></li>
+            </ul>
+            <div class="tip"><svg class="icon icon--sm"><use href="#i-heart"/></svg><div><p class="tip__title">Consejo PetCare</p><p class="tip__text">Mantén al día las vacunas de tus mascotas para protegerlas todo el año.</p></div></div>
+          </section>
+        </div>
+
+        <section class="card panel quick" aria-labelledby="h-quick">
+          <h3 class="panel__title" id="h-quick">Accesos rápidos</h3>
+          <div class="quick__grid">
+            <a class="quick__item" href="#registro"><span class="quick__icon"><svg class="icon icon--md"><use href="#i-user"/></svg></span>Registrar mascota<svg class="icon icon--sm chev"><use href="#i-right"/></svg></a>
+            <a class="quick__item" href="#ficha"><span class="quick__icon"><svg class="icon icon--md"><use href="#i-clip"/></svg></span>Buscar ficha médica<svg class="icon icon--sm chev"><use href="#i-right"/></svg></a>
+            <a class="quick__item" href="#disponibilidad"><span class="quick__icon"><svg class="icon icon--md"><use href="#i-clock"/></svg></span>Ver disponibilidad<svg class="icon icon--sm chev"><use href="#i-right"/></svg></a>
+          </div>
+        </section>
+      </section>
+
+      <!-- ============ REGISTRO ============ -->
+      <section class="page" id="registro" data-title="Registro de tutor y mascota" data-sub="Crea un nuevo perfil y asocia su primera mascota." aria-label="Registro de tutor y mascota" hidden>
+        <nav class="crumbs" aria-label="Migas de pan"><a href="#registro">Tutores y mascotas</a><svg class="icon icon--xs"><use href="#i-right"/></svg><span>Nuevo registro</span></nav>
+        <form action="#" method="post" id="registerForm" novalidate>
+          <section class="card form-card">
+            <div class="form-card__head"><span class="step">1</span><div><h2 class="form-card__title">Datos del tutor</h2><p class="form-card__sub">Información de contacto del responsable.</p></div></div>
+            <div class="grid grid--2">
+              <div class="field"><label class="field__label" for="t-nombre">Nombre completo <span class="req">*</span></label><input class="field-input" id="t-nombre" name="tutor_nombre" type="text" placeholder="Ej: Carolina Méndez" required></div>
+              <div class="field"><label class="field__label" for="t-rut">RUT <span class="req">*</span></label><input class="field-input" id="t-rut" name="tutor_rut" type="text" placeholder="12.345.678-9" required></div>
+              <div class="field"><label class="field__label" for="t-tel">Teléfono <span class="req">*</span></label><input class="field-input" id="t-tel" name="tutor_tel" type="tel" placeholder="+56 9 1234 5678" required></div>
+              <div class="field"><label class="field__label" for="t-mail">Correo electrónico <span class="req">*</span></label><input class="field-input" id="t-mail" name="tutor_mail" type="email" placeholder="correo@ejemplo.cl" required></div>
+            </div>
+          </section>
+          <section class="card form-card">
+            <div class="form-card__head"><span class="step">2</span><div><h2 class="form-card__title">Datos de la mascota</h2><p class="form-card__sub">Cuéntanos sobre el nuevo paciente.</p></div></div>
+            <div class="grid grid--3">
+              <div class="field"><label class="field__label" for="m-nombre">Nombre <span class="req">*</span></label><input class="field-input" id="m-nombre" type="text" placeholder="Nombre de la mascota" required></div>
+              <div class="field"><label class="field__label" for="m-especie">Especie <span class="req">*</span></label><div class="select"><select class="field-input" id="m-especie" required><option>Seleccionar</option><option>Perro</option><option>Gato</option><option>Otro</option></select><svg class="icon"><use href="#i-down"/></svg></div></div>
+              <div class="field"><label class="field__label" for="m-raza">Raza</label><input class="field-input" id="m-raza" type="text" placeholder="Ej: Golden Retriever"></div>
+              <div class="field"><label class="field__label" for="m-edad">Edad <span class="req">*</span></label><input class="field-input" id="m-edad" type="number" min="0" placeholder="Años" required></div>
+              <div class="field"><label class="field__label" for="m-sexo">Sexo <span class="req">*</span></label><div class="select"><select class="field-input" id="m-sexo" required><option>Seleccionar</option><option>Macho</option><option>Hembra</option></select><svg class="icon"><use href="#i-down"/></svg></div></div>
+              <div class="field"><label class="field__label" for="m-repro">Estado reproductivo</label><div class="select"><select class="field-input" id="m-repro"><option>No informado</option><option>Esterilizado</option><option>Entero</option></select><svg class="icon"><use href="#i-down"/></svg></div></div>
+            </div>
+            <label class="upload" for="m-foto" style="cursor:pointer"><span class="upload__btn"><svg class="icon"><use href="#i-plus"/></svg></span><span><span class="upload__title">Agregar foto de la mascota</span><span class="upload__sub">PNG o JPG, máximo 5 MB</span></span><input id="m-foto" type="file" accept="image/png,image/jpeg" hidden></label>
+          </section>
+          <div class="form-actions">
+            <a class="btn btn--outline" href="#inicio">Cancelar</a>
+            <button class="btn btn--primary" type="submit"><svg class="icon md icon--md"><use href="#i-check"/></svg>Guardar registro</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ============ DISPONIBILIDAD ============ -->
+      <section class="page" id="disponibilidad" data-title="Disponibilidad veterinaria" data-sub="Consulta y administra los horarios del equipo." aria-label="Disponibilidad veterinaria" hidden>
+        <div class="card toolbar">
+          <div class="toolbar__select"><svg class="icon icon--l"><use href="#i-search"/></svg><select class="field-input" aria-label="Veterinario"><option>Todos los veterinarios</option><option>Dr. Sebastián Rojas</option><option>Dra. Camila Torres</option><option>Dra. Andrea Silva</option></select><svg class="icon icon--r"><use href="#i-down"/></svg></div>
+          <div class="toolbar__date"><svg class="icon"><use href="#i-cal"/></svg>Junio 2025</div>
+          <button class="btn btn--primary" type="button"><svg class="icon md icon--md"><use href="#i-plus"/></svg>Nuevo horario</button>
+        </div>
+        <div class="avail">
+          <section class="card cal" aria-label="Calendario">
+            <div class="cal__nav"><button class="cal__btn" type="button" aria-label="Mes anterior">‹</button><h2 class="cal__month">Junio 2025</h2><button class="cal__btn" type="button" aria-label="Mes siguiente">›</button></div>
+            <div class="cal__grid" role="grid">
+              <span class="cal__dow">Lun</span><span class="cal__dow">Mar</span><span class="cal__dow">Mié</span><span class="cal__dow">Jue</span><span class="cal__dow">Vie</span><span class="cal__dow">Sáb</span><span class="cal__dow">Dom</span>
+              <button class="cal__day cal__day--out" type="button">28</button><button class="cal__day cal__day--out" type="button">29</button><button class="cal__day cal__day--out" type="button">30</button><button class="cal__day" type="button">1</button><button class="cal__day" type="button">2</button><button class="cal__day" type="button">3</button><button class="cal__day" type="button">4</button>
+              <button class="cal__day" type="button">5</button><button class="cal__day cal__day--dot" type="button">6</button><button class="cal__day" type="button">7</button><button class="cal__day" type="button">8</button><button class="cal__day" type="button">9</button><button class="cal__day" type="button">10</button><button class="cal__day cal__day--dot" type="button">11</button>
+              <button class="cal__day" type="button">12</button><button class="cal__day" type="button">13</button><button class="cal__day" type="button">14</button><button class="cal__day cal__day--dot" type="button">15</button><button class="cal__day" type="button">16</button><button class="cal__day" type="button">17</button><button class="cal__day cal__day--sel" type="button" aria-pressed="true">18</button>
+              <button class="cal__day" type="button">19</button><button class="cal__day cal__day--dot" type="button">20</button><button class="cal__day" type="button">21</button><button class="cal__day" type="button">22</button><button class="cal__day" type="button">23</button><button class="cal__day" type="button">24</button><button class="cal__day cal__day--dot" type="button">25</button>
+              <button class="cal__day" type="button">26</button><button class="cal__day" type="button">27</button><button class="cal__day" type="button">28</button><button class="cal__day" type="button">29</button><button class="cal__day" type="button">30</button><button class="cal__day cal__day--out" type="button">1</button><button class="cal__day cal__day--out" type="button">2</button>
+            </div>
+            <div class="cal__legend"><span><i></i>Con disponibilidad</span><span><i></i>Día seleccionado</span></div>
+          </section>
+          <section class="card day" aria-label="Horarios del día">
+            <div class="day__head"><div><h2 class="panel__title" style="font-size:var(--fs-15)">Miércoles, 18 de junio</h2><p class="panel__sub">Dr. Sebastián Rojas · Medicina general</p></div><span class="pill">6 cupos</span></div>
+            <div class="vet"><span class="avatar avatar--38">SR</span><div><p class="vet__name">Dr. Sebastián Rojas</p><p class="vet__time">09:00 — 17:30</p></div><a class="link" href="#disponibilidad">Cambiar</a></div>
+            <p class="slots__label">Horarios de mañana</p>
+            <div class="slots">
+              <button class="slot" type="button"><b>09:00</b><small>Disponible</small></button><button class="slot" type="button"><b>09:30</b><small>Disponible</small></button><div class="slot slot--busy"><b>10:00</b><small>Ocupado</small></div>
+              <button class="slot" type="button"><b>10:30</b><small>Disponible</small></button><div class="slot slot--busy"><b>11:00</b><small>Ocupado</small></div><button class="slot" type="button"><b>11:30</b><small>Disponible</small></button>
+            </div>
+            <p class="slots__label">Horarios de tarde</p>
+            <div class="slots">
+              <button class="slot" type="button"><b>15:00</b><small>Disponible</small></button><div class="slot slot--busy"><b>15:30</b><small>Ocupado</small></div><button class="slot" type="button"><b>16:00</b><small>Disponible</small></button>
+              <button class="slot" type="button"><b>16:30</b><small>Disponible</small></button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- ============ FICHA MÉDICA ============ -->
+      <section class="page" id="ficha" data-title="Ficha médica" data-sub="Historial clínico completo de tus pacientes." aria-label="Ficha médica" hidden>
+        <form class="search" role="search" action="#" onsubmit="return false">
+          <div class="search__wrap"><svg class="icon"><use href="#i-search"/></svg><input class="search__input" type="search" placeholder="Buscar por nombre de mascota, tutor o N° de ficha" aria-label="Buscar ficha médica"></div>
+          <button class="search__btn" type="submit">Buscar</button>
+        </form>
+        <section class="card patient" aria-label="Paciente">
+          <span class="patient__avatar"><svg class="icon" style="width:36px;height:36px;stroke-width:1.6"><use href="#i-paw"/></svg></span>
+          <div><p class="patient__id">Ficha N° PC-00124</p><h2 class="patient__name">Milo</h2><p class="patient__meta">Golden Retriever · Macho · 3 años</p></div>
+          <div class="patient__facts">
+            <div><span class="fact__label">Tutor</span><span class="fact__value">Carolina Méndez</span></div>
+            <div><span class="fact__label">Peso</span><span class="fact__value">28,4 kg</span></div>
+            <div><span class="fact__label">Microchip</span><span class="fact__value">985141000784521</span></div>
+            <div><span class="fact__label">Última visita</span><span class="fact__value">12 may 2025</span></div>
+          </div>
+          <button class="btn btn--outline" type="button"><svg class="icon icon--sm"><use href="#i-pencil"/></svg>Editar datos</button>
+        </section>
+        <section class="card record" aria-label="Historial">
+          <div class="tabs" role="tablist">
+            <button class="tab" role="tab" aria-selected="true" type="button">Diagnósticos</button>
+            <button class="tab" role="tab" aria-selected="false" type="button">Tratamientos</button>
+            <button class="tab" role="tab" aria-selected="false" type="button">Recetas</button>
+            <button class="tab" role="tab" aria-selected="false" type="button">Exámenes</button>
+            <button class="tab" role="tab" aria-selected="false" type="button">Vacunas <span class="tab__count">4</span></button>
+          </div>
+          <div class="record__body">
+            <div class="record__head"><div><h2 class="record__title">Diagnósticos</h2><p class="panel__sub">Registro histórico de diagnósticos de Milo.</p></div><button class="btn btn--primary" type="button"><svg class="icon md icon--md"><use href="#i-plus"/></svg>Agregar registro</button></div>
+            <ul class="timeline">
+              <li class="tl"><span class="tl__dot"><svg class="icon"><use href="#i-clip"/></svg></span><div class="tl__body"><div class="tl__top">12 may 2025 <span class="badge badge--ok">Activo</span></div><h3 class="tl__title">Dermatitis alérgica estacional</h3><p class="tl__desc">Se observa irritación leve en zona abdominal. Se indica tratamiento tópico y control en 14 días.</p><div class="tl__foot"><span class="tl__vet"><span class="avatar avatar--24">DC</span>Dra. Camila Torres</span><a class="link" href="#ficha">Ver detalle<svg class="icon icon--xs"><use href="#i-right"/></svg></a></div></div></li>
+              <li class="tl"><span class="tl__dot"><svg class="icon"><use href="#i-check"/></svg></span><div class="tl__body"><div class="tl__top">03 ene 2025 <span class="badge badge--muted">Finalizado</span></div><h3 class="tl__title">Gastroenteritis aguda</h3><p class="tl__desc">Cuadro digestivo leve. Paciente hidratado y con buen ánimo general.</p><div class="tl__foot"><span class="tl__vet"><span class="avatar avatar--24">DS</span>Dr. Sebastián Rojas</span><a class="link" href="#ficha">Ver detalle<svg class="icon icon--xs"><use href="#i-right"/></svg></a></div></div></li>
+              <li class="tl"><span class="tl__dot"><svg class="icon"><use href="#i-check"/></svg></span><div class="tl__body"><div class="tl__top">18 jun 2024 <span class="badge badge--muted">Finalizado</span></div><h3 class="tl__title">Control preventivo anual</h3><p class="tl__desc">Examen físico general dentro de parámetros normales.</p><div class="tl__foot"><span class="tl__vet"><span class="avatar avatar--24">DA</span>Dra. Andrea Silva</span><a class="link" href="#ficha">Ver detalle<svg class="icon icon--xs"><use href="#i-right"/></svg></a></div></div></li>
+            </ul>
+          </div>
+        </section>
+      </section>
+
+      <!-- ============ RECORDATORIOS ============ -->
+      <section class="page" id="recordatorios" data-title="Recordatorios" data-sub="Vacunas y controles próximos de tus pacientes." aria-label="Recordatorios" hidden>
+        <div class="banner" id="banner" role="status">
+          <span class="banner__icon"><svg class="icon"><use href="#i-bell"/></svg></span>
+          <div class="banner__text"><p class="banner__title">¡Hola, Carolina! Milo tiene una vacuna próxima</p><p class="banner__sub">La vacuna antirrábica vence el 21 de junio. Agenda una cita para mantenerlo protegido.</p></div>
+          <button class="btn" type="button">Agendar ahora</button>
+          <button class="banner__close" id="bannerClose" type="button" aria-label="Cerrar aviso"><svg class="icon"><use href="#i-x"/></svg></button>
+        </div>
+        <div class="stats3">
+          <article class="card stat3"><span class="stat__icon stat__icon--orange"><svg class="icon"><use href="#i-bell"/></svg></span><div><p class="stat3__value">3</p><p class="stat3__label">Pendientes de envío</p></div></article>
+          <article class="card stat3"><span class="stat__icon stat__icon--teal"><svg class="icon"><use href="#i-check"/></svg></span><div><p class="stat3__value">18</p><p class="stat3__label">Enviados este mes</p></div></article>
+          <article class="card stat3"><span class="stat__icon stat__icon--blue"><svg class="icon"><use href="#i-cal"/></svg></span><div><p class="stat3__value">7</p><p class="stat3__label">Próximos 30 días</p></div></article>
+        </div>
+        <section class="card rtable" aria-labelledby="h-prox">
+          <div class="rtable__head">
+            <div><h2 class="panel__title" id="h-prox">Próximos recordatorios</h2><p class="panel__sub">Notificaciones programadas para tutores</p></div>
+            <div class="seg" role="group" aria-label="Filtrar recordatorios"><button type="button" data-filter="all" aria-pressed="true">Todos</button><button type="button" data-filter="pendiente" aria-pressed="false">Pendientes</button><button type="button" data-filter="enviado" aria-pressed="false">Enviados</button></div>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th scope="col">Fecha</th><th scope="col">Mascota</th><th scope="col">Recordatorio</th><th scope="col">Tutor</th><th scope="col">Estado de envío</th><th scope="col"><span class="sr-only" style="position:absolute;left:-9999px">Acciones</span></th></tr></thead>
+              <tbody id="remBody">
+                <tr data-status="pendiente"><td><span class="cell-strong">21 Jun 2025</span><span class="cell-sub">En 3 días</span></td><td><span class="cell-pet"><span class="pet pet--orange pet--26"><svg class="icon icon--xs"><use href="#i-paw"/></svg></span>Milo</span></td><td>Vacuna antirrábica</td><td>Carolina Méndez</td><td><span class="badge badge--warn">Pendiente</span></td><td><button class="dots" type="button" aria-label="Más opciones">•••</button></td></tr>
+                <tr data-status="enviado"><td><span class="cell-strong">24 Jun 2025</span><span class="cell-sub">En 4 días</span></td><td><span class="cell-pet"><span class="pet pet--teal pet--26"><svg class="icon icon--xs"><use href="#i-paw"/></svg></span>Simón</span></td><td>Control post operatorio</td><td>Javier López</td><td><span class="badge badge--ok">Enviado</span></td><td><button class="dots" type="button" aria-label="Más opciones">•••</button></td></tr>
+                <tr data-status="pendiente"><td><span class="cell-strong">02 Jul 2025</span><span class="cell-sub">En 16 días</span></td><td><span class="cell-pet"><span class="pet pet--orange pet--26"><svg class="icon icon--xs"><use href="#i-paw"/></svg></span>Luna</span></td><td>Control anual</td><td>Felipe Araya</td><td><span class="badge badge--warn">Pendiente</span></td><td><button class="dots" type="button" aria-label="Más opciones">•••</button></td></tr>
+                <tr data-status="enviado"><td><span class="cell-strong">08 Jul 2025</span><span class="cell-sub">En 17 días</span></td><td><span class="cell-pet"><span class="pet pet--teal pet--26"><svg class="icon icon--xs"><use href="#i-paw"/></svg></span>Nala</span></td><td>Vacuna triple felina</td><td>Diego Fuentes</td><td><span class="badge badge--ok">Enviado</span></td><td><button class="dots" type="button" aria-label="Más opciones">•••</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <!-- ============ ADMINISTRACIÓN ============ -->
+      <section class="page" id="administracion" data-title="Panel de administración" data-sub="Configura el equipo y la operación de PetCare." aria-label="Panel de administración" hidden>
+        <div class="admin">
+          <nav class="card settings" aria-label="Configuración">
+            <h2 class="settings__title">Configuración</h2>
+            <a class="settings__link" href="#administracion" aria-current="true"><svg class="icon"><use href="#i-users"/></svg>Usuarios<svg class="icon chev"><use href="#i-right"/></svg></a>
+            <a class="settings__link" href="#administracion"><svg class="icon"><use href="#i-clip"/></svg>Profesionales<svg class="icon chev"><use href="#i-right"/></svg></a>
+            <a class="settings__link" href="#administracion"><svg class="icon"><use href="#i-clock"/></svg>Horarios<svg class="icon chev"><use href="#i-right"/></svg></a>
+          </nav>
+          <section class="card users" aria-labelledby="h-users">
+            <div class="users__head"><div><h2 class="panel__title" id="h-users" style="font-weight:500;font-size:var(--fs-14)">Usuarios</h2><p class="panel__sub" style="font-size:var(--fs-10)">Administra los usuarios registrados en el sistema.</p></div><button class="btn btn--primary" type="button"><svg class="icon md icon--md"><use href="#i-plus"/></svg>Agregar usuario</button></div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th scope="col">Nombre</th><th scope="col">Correo</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+                <tbody>
+                  <tr><td><div class="user-cell"><span class="avatar">CM</span><div><span class="user-cell__name">Carolina Méndez</span><span class="user-cell__role">Administradora</span></div></div></td><td class="mail">carolina@petcare.cl</td><td><span class="badge badge--ok">Activo</span></td><td><button class="icon-btn" type="button" aria-label="Editar Carolina Méndez"><svg class="icon"><use href="#i-pencil"/></svg></button><button class="icon-btn icon-btn--danger" type="button" aria-label="Eliminar Carolina Méndez"><svg class="icon"><use href="#i-trash"/></svg></button></td></tr>
+                  <tr><td><div class="user-cell"><span class="avatar">SR</span><div><span class="user-cell__name">Sebastián Rojas</span><span class="user-cell__role">Veterinario/a</span></div></div></td><td class="mail">srojas@petcare.cl</td><td><span class="badge badge--ok">Activo</span></td><td><button class="icon-btn" type="button" aria-label="Editar Sebastián Rojas"><svg class="icon"><use href="#i-pencil"/></svg></button><button class="icon-btn icon-btn--danger" type="button" aria-label="Eliminar Sebastián Rojas"><svg class="icon"><use href="#i-trash"/></svg></button></td></tr>
+                  <tr><td><div class="user-cell"><span class="avatar">CT</span><div><span class="user-cell__name">Camila Torres</span><span class="user-cell__role">Veterinario/a</span></div></div></td><td class="mail">ctorres@petcare.cl</td><td><span class="badge badge--ok">Activo</span></td><td><button class="icon-btn" type="button" aria-label="Editar Camila Torres"><svg class="icon"><use href="#i-pencil"/></svg></button><button class="icon-btn icon-btn--danger" type="button" aria-label="Eliminar Camila Torres"><svg class="icon"><use href="#i-trash"/></svg></button></td></tr>
+                  <tr><td><div class="user-cell"><span class="avatar">AS</span><div><span class="user-cell__name" style="width:auto">Andrea Silva</span><span class="user-cell__role">Veterinario/a</span></div></div></td><td class="mail">asilva@petcare.cl</td><td><span class="badge badge--off">Inactivo</span></td><td><button class="icon-btn" type="button" aria-label="Editar Andrea Silva"><svg class="icon"><use href="#i-pencil"/></svg></button><button class="icon-btn icon-btn--danger" type="button" aria-label="Eliminar Andrea Silva"><svg class="icon"><use href="#i-trash"/></svg></button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+(function () {
+  var app = document.getElementById('app');
+  var menuBtn = document.getElementById('menuBtn');
+  var backdrop = document.getElementById('backdrop');
+  var pages = document.querySelectorAll('.page');
+  var links = document.querySelectorAll('.nav__link[data-route]');
+  var title = document.getElementById('pageTitle');
+  var sub = document.getElementById('pageSub');
+
+  function setMenu(open) {
+    app.classList.toggle('app--menu-open', open);
+    menuBtn.setAttribute('aria-expanded', String(open));
+    menuBtn.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+  }
+  menuBtn.addEventListener('click', function () {
+    setMenu(menuBtn.getAttribute('aria-expanded') !== 'true');
+  });
+  backdrop.addEventListener('click', function () { setMenu(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMenu(false); });
+
+  function route() {
+    var id = location.hash.replace('#', '') || 'inicio';
+    var target = document.getElementById(id);
+    if (!target || !target.classList.contains('page')) { setMenu(false); return; }
+    pages.forEach(function (p) { p.hidden = p !== target; });
+    links.forEach(function (l) {
+      if (l.dataset.route === id) l.setAttribute('aria-current', 'page');
+      else l.removeAttribute('aria-current');
+    });
+    title.textContent = target.dataset.title;
+    sub.textContent = target.dataset.sub;
+    document.title = 'PetCare – ' + target.dataset.title;
+    setMenu(false);
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', route);
+  route();
+
+  /* Recordatorios: filter + dismiss banner */
+  var seg = document.querySelectorAll('.seg button');
+  var rows = document.querySelectorAll('#remBody tr');
+  seg.forEach(function (b) {
+    b.addEventListener('click', function () {
+      seg.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      rows.forEach(function (r) {
+        r.hidden = b.dataset.filter !== 'all' && r.dataset.status !== b.dataset.filter;
+      });
+    });
+  });
+  document.getElementById('bannerClose').addEventListener('click', function () {
+    document.getElementById('banner').hidden = true;
+  });
+
+  /* Registro: prevent real submit */
+  document.getElementById('registerForm').addEventListener('submit', function (e) { e.preventDefault(); });
+})();
+</script>
+</body>
+</html>
