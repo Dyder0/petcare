@@ -288,6 +288,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 .settings__link .chev{margin-left:auto;width:14px;height:14px}
 .settings__link[aria-current="true"]{background:#e6f6f3;color:var(--c-teal-700);font-weight:600}
 .users{overflow:hidden}
+.admin-embed{overflow:hidden}
+.admin-embed__frame{display:block;width:100%;height:min(76vh,920px);min-height:620px;border:0;border-top:1px solid var(--c-line);background:#fff}
 .users__head{display:flex;justify-content:space-between;align-items:flex-start;padding:21px 21px 18px;gap:12px;flex-wrap:wrap}
 .users .btn{height:40px}
 .user-cell{display:flex;align-items:center;gap:12px;padding:8px 0}
@@ -311,6 +313,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   .stats{grid-template-columns:repeat(2,1fr)}
   .home-grid,.avail{grid-template-columns:1fr}
   .admin{grid-template-columns:1fr}
+  .admin-embed__frame{height:75vh;min-height:560px}
   .patient__facts{margin-left:0;flex-wrap:wrap;gap:20px 34px}
 }
 /* ===== Mobile ===== */

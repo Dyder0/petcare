@@ -3,6 +3,7 @@ from urllib.parse import urljoin
 from django.conf import settings
 from django.urls import reverse
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 
 from apps.appointments.models import Appointment
 from apps.billing.models import Debt, Payment
@@ -38,6 +39,7 @@ class DebtSerializer(serializers.ModelSerializer):
             "paid_at",
         ]
 
+    @extend_schema_field(serializers.CharField)
     def get_payment_url(self, obj):
         path = reverse("public-payment", kwargs={"token": obj.payment_token})
         if settings.PUBLIC_BASE_URL:
@@ -122,3 +124,10 @@ class PaymentSimulationInputSerializer(serializers.Serializer):
 
 class TransbankPaymentInputSerializer(PaymentSimulationInputSerializer):
     pass
+
+
+class TransbankReturnInputSerializer(serializers.Serializer):
+    token_ws = serializers.CharField(required=False, allow_blank=False)
+    TBK_ORDEN_COMPRA = serializers.CharField(required=False, max_length=40)
+    TBK_ID_SESION = serializers.CharField(required=False, max_length=36)
+    TBK_TOKEN = serializers.CharField(required=False, max_length=64)

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 
 from apps.accounts.models import User
 from apps.appointments.models import Appointment, ClinicSettings, ScheduleDay
@@ -30,6 +31,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
 
+    @extend_schema_field(serializers.BooleanField)
     def get_has_debt(self, obj):
         return hasattr(obj, "debt")
 

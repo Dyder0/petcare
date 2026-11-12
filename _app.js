@@ -1378,10 +1378,32 @@
   function renderAdmin() {
     var panel = document.getElementById('adminPanel');
     if (!panel) return;
+    if (!currentUser || currentUser.role !== 'Administrador/a') {
+      panel.innerHTML = '';
+      return;
+    }
     document.querySelectorAll('.settings__link[data-admin]').forEach(function (link) {
       if (link.dataset.admin === state.adminSection) link.setAttribute('aria-current', 'true');
       else link.removeAttribute('aria-current');
     });
+
+    if (state.adminSection === 'django' || state.adminSection === 'api') {
+      var isApi = state.adminSection === 'api';
+      var title = isApi ? 'Swagger / OpenAPI' : 'Django Admin';
+      var description = isApi
+        ? 'Documentación interactiva de la API PetCare. Disponible solo para administradores.'
+        : 'Administra los datos desde Django, sin salir del panel PetCare.';
+      var src = isApi
+        ? '/api-auth/login/?next=%2Fapi%2Fdocs%2F'
+        : '/admin/';
+      panel.innerHTML = '<section class="card users admin-embed" aria-labelledby="admin-embed-title">' +
+        '<div class="users__head"><div><h2 class="panel__title" id="admin-embed-title" style="font-weight:500;font-size:var(--fs-14)">' + title + '</h2>' +
+        '<p class="panel__sub" style="font-size:var(--fs-10)">' + description +
+        (isApi ? ' Inicia sesión en el formulario integrado para abrir Swagger.' : '') +
+        '</p></div></div>' +
+        '<iframe class="admin-embed__frame" src="' + src + '" title="' + title + '" loading="lazy"></iframe></section>';
+      return;
+    }
 
     if (state.adminSection === 'profesionales') {
       var vets = getVets();
@@ -2735,6 +2757,8 @@
     var mn = document.getElementById('menuUserName');
     var mm = document.getElementById('menuUserMail');
     var clinic = document.getElementById('clinicName');
+    var adminNav = document.querySelector('.nav__link[data-route="administracion"]');
+    if (adminNav) adminNav.hidden = currentUser.role !== 'Administrador/a';
     if (av) av.textContent = initials(name);
     if (nm) nm.textContent = name;
     if (rl) rl.textContent = role;
@@ -2787,6 +2811,10 @@
   function route() {
     if (!currentUser) return;
     var id = (location.hash || '#inicio').replace('#', '') || 'inicio';
+    if (id === 'administracion' && currentUser.role !== 'Administrador/a') {
+      location.hash = '#inicio';
+      return;
+    }
     var target = document.getElementById(id);
     if (!target || !target.classList.contains('page')) {
       if (id !== 'inicio') { location.hash = '#inicio'; return; }

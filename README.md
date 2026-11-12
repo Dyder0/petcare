@@ -90,6 +90,8 @@ Desde **Citas**, el personal administrador o de recepción puede usar **Crear co
 
 El panel administrativo mantiene un acceso al portal público por RUT en `/pagar/`. Desde ahí se consultan deudas pendientes; al continuar, el checkout se abre en la página completa para redirigir de forma segura a Transbank.
 
+La sección **Administración** del panel PetCare está disponible solo para el rol administrador; permanece oculta para veterinarios y recepción, y las URL directas a esa sección redirigen al inicio. Incluye vistas integradas de Django Admin (`/admin/`) y Swagger/OpenAPI (`/api/docs/`) dentro del mismo panel, sin abrir otra pestaña. Para Swagger, inicia sesión en el formulario integrado con la cuenta administradora; el esquema OpenAPI está disponible en `/api/schema/` y la documentación requiere una sesión autenticada como administrador. Django Admin requiere una cuenta `is_staff` con los permisos adecuados; para acceso completo debe usarse el superusuario inicial. La API conserva sus permisos y autenticación JWT.
+
 Las citas creadas desde la agenda se guardan en PostgreSQL con mascota y veterinario existentes. Desde cada cita activa se puede crear un cobro; la cuenta queda asociada a esa cita (máximo una por cita), y la relación aparece en la agenda y en Pagos. Una cita con cobro no se puede eliminar, cancelar ni cambiar de mascota.
 
 ### Datos locales antiguos

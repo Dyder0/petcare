@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+from drf_spectacular.utils import extend_schema
 
 from apps.accounts.models import User
 from apps.appointments.models import Appointment, ClinicSettings, ScheduleDay
@@ -69,6 +70,7 @@ class ScheduleView(APIView):
         permission = IsAdministrator if self.request.method != "GET" else IsAuthenticated
         return [permission()]
 
+    @extend_schema(responses=ClinicScheduleSerializer)
     def get(self, request):
         settings, _ = ClinicSettings.objects.get_or_create(pk=1)
         days = ScheduleDay.objects.all().values(
@@ -87,6 +89,7 @@ class ScheduleView(APIView):
             }
         )
 
+    @extend_schema(request=ClinicScheduleSerializer, responses=ClinicScheduleSerializer)
     def put(self, request):
         serializer = ClinicScheduleSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -108,9 +111,24 @@ class AvailabilityQuerySerializer(serializers.Serializer):
     veterinarian = serializers.UUIDField(required=False)
 
 
+class AvailabilitySlotSerializer(serializers.Serializer):
+    time = serializers.TimeField()
+    available = serializers.BooleanField()
+    veterinarian_ids = serializers.ListField(child=serializers.UUIDField())
+
+
+class AvailabilityResponseSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    slots = AvailabilitySlotSerializer(many=True)
+
+
 class AvailabilityView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        parameters=[AvailabilityQuerySerializer],
+        responses=AvailabilityResponseSerializer,
+    )
     def get(self, request):
         date_serializer = AvailabilityQuerySerializer(data=request.query_params)
         date_serializer.is_valid(raise_exception=True)

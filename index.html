@@ -680,6 +680,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 .settings__link .chev{margin-left:auto;width:14px;height:14px}
 .settings__link[aria-current="true"]{background:#e6f6f3;color:var(--c-teal-700);font-weight:600}
 .users{overflow:hidden}
+.admin-embed{overflow:hidden}
+.admin-embed__frame{display:block;width:100%;height:min(76vh,920px);min-height:620px;border:0;border-top:1px solid var(--c-line);background:#fff}
 .users__head{display:flex;justify-content:space-between;align-items:flex-start;padding:21px 21px 18px;gap:12px;flex-wrap:wrap}
 .users .btn{height:40px}
 .user-cell{display:flex;align-items:center;gap:12px;padding:8px 0}
@@ -703,6 +705,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   .stats{grid-template-columns:repeat(2,1fr)}
   .home-grid,.avail{grid-template-columns:1fr}
   .admin{grid-template-columns:1fr}
+  .admin-embed__frame{height:75vh;min-height:560px}
   .patient__facts{margin-left:0;flex-wrap:wrap;gap:20px 34px}
 }
 /* ===== Mobile ===== */
@@ -1927,6 +1930,8 @@ button.slot:hover { background: #e2f5f1; border-color: var(--c-teal-500); }
             <a class="settings__link" href="#administracion" data-action="admin-section" data-admin="usuarios" aria-current="true"><svg class="icon"><use href="#i-users"/></svg>Usuarios<svg class="icon chev"><use href="#i-right"/></svg></a>
             <a class="settings__link" href="#administracion" data-action="admin-section" data-admin="profesionales"><svg class="icon"><use href="#i-clip"/></svg>Profesionales<svg class="icon chev"><use href="#i-right"/></svg></a>
             <a class="settings__link" href="#administracion" data-action="admin-section" data-admin="horarios"><svg class="icon"><use href="#i-clock"/></svg>Horarios<svg class="icon chev"><use href="#i-right"/></svg></a>
+            <a class="settings__link" href="#administracion" data-action="admin-section" data-admin="django"><svg class="icon"><use href="#i-shield"/></svg>Django Admin<svg class="icon chev"><use href="#i-right"/></svg></a>
+            <a class="settings__link" href="#administracion" data-action="admin-section" data-admin="api"><svg class="icon"><use href="#i-clip"/></svg>Swagger / OpenAPI<svg class="icon chev"><use href="#i-right"/></svg></a>
           </nav>
           <div id="adminPanel"></div>
         </div>
@@ -3321,10 +3326,32 @@ button.slot:hover { background: #e2f5f1; border-color: var(--c-teal-500); }
   function renderAdmin() {
     var panel = document.getElementById('adminPanel');
     if (!panel) return;
+    if (!currentUser || currentUser.role !== 'Administrador/a') {
+      panel.innerHTML = '';
+      return;
+    }
     document.querySelectorAll('.settings__link[data-admin]').forEach(function (link) {
       if (link.dataset.admin === state.adminSection) link.setAttribute('aria-current', 'true');
       else link.removeAttribute('aria-current');
     });
+
+    if (state.adminSection === 'django' || state.adminSection === 'api') {
+      var isApi = state.adminSection === 'api';
+      var title = isApi ? 'Swagger / OpenAPI' : 'Django Admin';
+      var description = isApi
+        ? 'Documentación interactiva de la API PetCare. Disponible solo para administradores.'
+        : 'Administra los datos desde Django, sin salir del panel PetCare.';
+      var src = isApi
+        ? '/api-auth/login/?next=%2Fapi%2Fdocs%2F'
+        : '/admin/';
+      panel.innerHTML = '<section class="card users admin-embed" aria-labelledby="admin-embed-title">' +
+        '<div class="users__head"><div><h2 class="panel__title" id="admin-embed-title" style="font-weight:500;font-size:var(--fs-14)">' + title + '</h2>' +
+        '<p class="panel__sub" style="font-size:var(--fs-10)">' + description +
+        (isApi ? ' Inicia sesión en el formulario integrado para abrir Swagger.' : '') +
+        '</p></div></div>' +
+        '<iframe class="admin-embed__frame" src="' + src + '" title="' + title + '" loading="lazy"></iframe></section>';
+      return;
+    }
 
     if (state.adminSection === 'profesionales') {
       var vets = getVets();
@@ -4678,6 +4705,8 @@ button.slot:hover { background: #e2f5f1; border-color: var(--c-teal-500); }
     var mn = document.getElementById('menuUserName');
     var mm = document.getElementById('menuUserMail');
     var clinic = document.getElementById('clinicName');
+    var adminNav = document.querySelector('.nav__link[data-route="administracion"]');
+    if (adminNav) adminNav.hidden = currentUser.role !== 'Administrador/a';
     if (av) av.textContent = initials(name);
     if (nm) nm.textContent = name;
     if (rl) rl.textContent = role;
@@ -4730,6 +4759,10 @@ button.slot:hover { background: #e2f5f1; border-color: var(--c-teal-500); }
   function route() {
     if (!currentUser) return;
     var id = (location.hash || '#inicio').replace('#', '') || 'inicio';
+    if (id === 'administracion' && currentUser.role !== 'Administrador/a') {
+      location.hash = '#inicio';
+      return;
+    }
     var target = document.getElementById(id);
     if (!target || !target.classList.contains('page')) {
       if (id !== 'inicio') { location.hash = '#inicio'; return; }

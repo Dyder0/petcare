@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "rest_framework",
+    "drf_spectacular",
     "django_filters",
     "apps.accounts.apps.AccountsConfig",
     "apps.patients.apps.PatientsConfig",
@@ -44,6 +45,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+X_FRAME_OPTIONS = "SAMEORIGIN"
 if not DEBUG:
     MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 
@@ -120,8 +122,10 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 8 * 1024 * 1024
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -138,6 +142,13 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.UserRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {"anon": "60/hour", "user": "1000/hour"},
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "PetCare API",
+    "DESCRIPTION": "API REST de administración y operación de PetCare.",
+    "VERSION": "1.0.0",
+    "SERVE_PERMISSIONS": ["apps.common.permissions.IsAdministrator"],
 }
 
 SIMPLE_JWT = {

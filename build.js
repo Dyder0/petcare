@@ -197,6 +197,10 @@ appBody = once(appBody,
   '<a class="settings__link" href="#administracion"><svg class="icon"><use href="#i-clock"/></svg>Horarios',
   '<a class="settings__link" href="#administracion" data-action="admin-section" data-admin="horarios"><svg class="icon"><use href="#i-clock"/></svg>Horarios',
   'admin horarios link');
+appBody = once(appBody,
+  '<a class="settings__link" href="#administracion" data-action="admin-section" data-admin="horarios"><svg class="icon"><use href="#i-clock"/></svg>Horarios<svg class="icon chev"><use href="#i-right"/></svg></a>',
+  '<a class="settings__link" href="#administracion" data-action="admin-section" data-admin="horarios"><svg class="icon"><use href="#i-clock"/></svg>Horarios<svg class="icon chev"><use href="#i-right"/></svg></a>\n            <a class="settings__link" href="#administracion" data-action="admin-section" data-admin="django"><svg class="icon"><use href="#i-shield"/></svg>Django Admin<svg class="icon chev"><use href="#i-right"/></svg></a>\n            <a class="settings__link" href="#administracion" data-action="admin-section" data-admin="api"><svg class="icon"><use href="#i-clip"/></svg>Swagger / OpenAPI<svg class="icon chev"><use href="#i-right"/></svg></a>',
+  'enlaces internos Django Admin y API REST');
 if (!/<section class="card users"[\s\S]*?<\/section>/.test(appBody)) throw new Error('No se encontró sección usuarios');
 appBody = appBody.replace(/<section class="card users"[\s\S]*?<\/section>/, '<div id="adminPanel"></div>');
 

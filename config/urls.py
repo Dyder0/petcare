@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import include, path
 from config.views import home
 from rest_framework.routers import DefaultRouter
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from apps.accounts.views import ProfileView, UserViewSet
 from apps.appointments.views import (
@@ -38,6 +39,13 @@ urlpatterns = [
     ),
     path("pagar/<str:token>/", public_payment_page, name="public-payment"),
     path("admin/", admin.site.urls),
+    path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "api/docs/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
     path("api/auth/me/", ProfileView.as_view(), name="profile"),
     path("api/auth/", include("apps.accounts.urls")),
     path("api/schedule/", ScheduleView.as_view(), name="schedule"),

@@ -13,6 +13,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from drf_spectacular.utils import extend_schema
 
 from apps.billing.models import Debt, Payment
 from apps.billing.serializers import (
@@ -20,6 +21,7 @@ from apps.billing.serializers import (
     PaymentSerializer,
     PaymentSimulationInputSerializer,
     TransbankPaymentInputSerializer,
+    TransbankReturnInputSerializer,
 )
 from apps.common.permissions import IsBillingStaff
 from apps.billing.transbank import (
@@ -236,9 +238,17 @@ class TransbankReturnView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        parameters=[TransbankReturnInputSerializer],
+        responses=PaymentSerializer,
+    )
     def get(self, request):
         return self._handle_return(request.query_params)
 
+    @extend_schema(
+        request=TransbankReturnInputSerializer,
+        responses=PaymentSerializer,
+    )
     def post(self, request):
         return self._handle_return(request.data)
 
